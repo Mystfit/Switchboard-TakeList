@@ -64,7 +64,7 @@ class DeviceTakeList(Device):
         Called by switchboard_dialog when recording was stopped.
         """
         timecode = "00:00:00:00"
-        DeviceTakeList.takelist_model.add_take(SETTINGS.CURRENT_SEQUENCE, self._slate, self._take, self._description, timecode)
+        DeviceTakeList.takelist_model.add_take(SETTINGS.CURRENT_SEQUENCE, self._slate, self._take, "" if self._description == "description" else self._description, timecode)
         self.record_stop_confirm(timecode)
 
 

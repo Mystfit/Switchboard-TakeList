@@ -1,7 +1,9 @@
 from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton
-from PySide2.QtCore import Slot, QSortFilterProxyModel
+from PySide2.QtCore import Slot, QSortFilterProxyModel, QCoreApplication
 from .takelist_model import TakeListModel
 from .takelist_view import TakeListView 
+from switchboard.switchboard_logging import ConsoleStream, LOGGER
+from switchboard import switchboard_dialog as sb_dialog
 
 class TakeListUI(QWidget):
     def __init__(self, parent: QWidget, model: TakeListModel):
@@ -14,6 +16,8 @@ class TakeListUI(QWidget):
         layout = QVBoxLayout(self)
         layout.addLayout(self.create_button_row_layout())
         layout.addWidget(TakeListView(self, self.proxymodel))
+
+        LOGGER.info(f"Top level widget: {QCoreApplication.instance().findChild(sb_dialog.SwitchboardDialog)}")
 
     def create_button_row_layout(self) -> QHBoxLayout:
         layout_buttons = QHBoxLayout()
