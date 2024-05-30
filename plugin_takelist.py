@@ -1,9 +1,13 @@
 from switchboard.devices.device_base import Device, DeviceStatus
 from switchboard.devices.device_widget_base import DeviceWidget
 from switchboard.config import SETTINGS
+from switchboard.switchboard_logging import ConsoleStream, LOGGER
 
 from .takelist_ui import TakeListUI
 from .takelist_model import TakeListModel
+
+from PySide2 import QtCore
+from PySide2 import QtWidgets
 
 class DeviceTakeList(Device):
     takelist_ui = None
@@ -64,8 +68,19 @@ class DeviceTakeList(Device):
         Called by switchboard_dialog when recording was stopped.
         """
         timecode = "00:00:00:00"
-        DeviceTakeList.takelist_model.add_take(SETTINGS.CURRENT_SEQUENCE, self._slate, self._take, "" if self._description == "description" else self._description, timecode)
+
+        take_info_dialog = TakeInfoDialog()
+        try:
+            take_info_dialog.ui.exec()
+        finally:
+            DeviceTakeList.takelist_model.add_take(SETTINGS.CURRENT_SEQUENCE, self._slate, self._take, take_info_dialog.get_description(), take_info_dialog.get_quality(), timecode)
         self.record_stop_confirm(timecode)
+
+    def load_takes_from_json(self):
+        """
+        Load takes from json file
+        """
+        DeviceTakeList.takelist_model.load_takes_from_json()
 
 
 class DeviceWidgetTakeList(DeviceWidget):
@@ -75,3 +90,53 @@ class DeviceWidgetTakeList(DeviceWidget):
     def _add_control_buttons(self):
         pass
         #super()._add_control_buttons()
+
+
+class TakeInfoDialog(QtCore.QObject):
+    def __init__(self):
+        super().__init__()
+
+        # Set the UI object
+        self.ui = QtWidgets.QDialog()
+        self.ui.resize(400, 50)
+        dialog_layout = QtWidgets.QVBoxLayout(self.ui)
+        dialog_layout.setContentsMargins(4, 4, 4, 4)
+        self.ui.setWindowTitle("Take Info")
+
+        self.ui.take_info_layout = QtWidgets.QWidget()
+        
+        # Take description
+        desc_layout = QtWidgets.QHBoxLayout(self.ui.take_info_layout)
+        self.ui.description_label = QtWidgets.QLabel()
+        self.ui.description_label.setText("Description")
+        self.ui.description_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.ui.description_line_edit = QtWidgets.QLineEdit()
+        # self.ui.description_line_edit.textChanged.connect(
+        #     self.config_path_text_changed)
+        desc_layout.addWidget(self.ui.description_label)
+        desc_layout.addWidget(self.ui.description_line_edit)
+        dialog_layout.addLayout(desc_layout)
+        
+        # Take quality
+        quality_layout = QtWidgets.QHBoxLayout(self.ui.take_info_layout)
+        self.ui.quality_label = QtWidgets.QLabel()
+        self.ui.quality_label.setText("Quality")
+        self.ui.quality_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.ui.quality_combo_box = QtWidgets.QComboBox()
+        self.ui.quality_combo_box.addItem("⭐", "S")
+        self.ui.quality_combo_box.addItem("✔️", "G")
+        self.ui.quality_combo_box.addItem("❌", "NG")
+
+        # self.ui.quality_combo_box.currentIndexChanged.connect(
+        #     self.config_path_text_changed)
+        quality_layout.addWidget(self.ui.quality_label)
+        quality_layout.addWidget(self.ui.quality_combo_box)
+        dialog_layout.addLayout(quality_layout)
+
+        dialog_layout.addWidget(self.ui.take_info_layout)
+
+    def get_quality(self):
+        return self.ui.quality_combo_box.itemData(self.ui.quality_combo_box.currentIndex())
+    
+    def get_description(self):
+        return self.ui.description_line_edit.text()

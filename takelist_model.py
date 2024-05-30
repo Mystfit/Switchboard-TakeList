@@ -398,7 +398,7 @@ class TakeListModel(QAbstractItemModel):
             return Qt.ItemIsEditable | Qt.ItemIsSelectable | Qt.ItemIsEnabled
         return Qt.ItemIsEnabled
 
-    def add_take(self, sequence: str, slate:str, take: int, description: str, timecode: str):
+    def add_take(self, sequence: str, slate:str, take: int, description: str, quality: str, timecode: str):
         # self._data.append({
         #     'Sequence': sequence,
         #     'Slate': slate,   

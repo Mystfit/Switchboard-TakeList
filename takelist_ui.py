@@ -17,8 +17,6 @@ class TakeListUI(QWidget):
         layout.addLayout(self.create_button_row_layout())
         layout.addWidget(TakeListView(self, self.proxymodel))
 
-        LOGGER.info(f"Top level widget: {QCoreApplication.instance().findChild(sb_dialog.SwitchboardDialog)}")
-
     def create_button_row_layout(self) -> QHBoxLayout:
         layout_buttons = QHBoxLayout()
 
